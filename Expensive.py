@@ -1,118 +1,144 @@
 import os
 import pandas as pd
 
-expensive =dict()
+# Initialize global expense dictionary
+expensive = {
+    'date_of_expensive': [],
+    'category_of_expensive': [],
+    'amount': [],
+    'Description': []
+}
+
 def get_user_expensive():
-    '''
-    the function get the user expesive
-    :return: str of the expensive
-    '''
+    """
+    Get user expense details.
+    :return: None
+    """
+    print('Enter your expense details:')
+    date_of_expensive = input('Enter date (YYYY-MM-DD): ')
+    cat_of_expensive = input('Category of Expense (e.g., Food, Travel): ')
+    amount = input('Enter the amount spent: ')
+    description = input('Please Enter a description: ')
 
-    print('Enter your expensive ')
-
-    date_of_expensive = input('Enter date in format: YYY-MM-DD ')
-    cat_of_expensive =  input('Category of Expensive. Example Food or Travel ')
-    amount           =  input('Enter the amount spent ')
-    descripton       =  input('Please Enter a description: ')
-
-
-    #initialize the variables
-    expensive['date_of_expensive']=[]
-    expensive['category_of_expensive']=[]
-    expensive['amount']=[]
-    expensive['Description']=[]
-
-    #adding new expenisve
+    # Add new expense to global dictionary
     expensive['date_of_expensive'].append(date_of_expensive)
     expensive['category_of_expensive'].append(cat_of_expensive)
     expensive['amount'].append(amount)
-    expensive['Description'].append(descripton)
-    print('Epensive has been Added successfully')
+    expensive['Description'].append(description)
+    print('Expense has been added successfully.')
 
-    return expensive
 
-def view_expensive(expensive):
-    if expensive is not None:
-
-        print('\n These are your current expensive')
-        for key, value in expensive.items():
-            if not value or value==['']:
-                print(f'No detail for {key}')
-            else:
-                print(f'{key} : {value}')
+def view_expensive():
+    """
+    Display current expenses.
+    :return: None
+    """
+    if expensive['date_of_expensive']:
+        print('\nHere are your current expenses:')
+        df = pd.DataFrame(expensive)
+        print()
+        print(df)
     else:
-        print('The expensive is none')
+        print('No expenses recorded.')
+
 
 def get_monthly_budget():
-    budget = int(input('Please Enter Your monthly budget '))
+    """
+    Get the user's monthly budget.
+    :return: int
+    """
+    budget = int(input('Please enter your monthly budget: '))
     return budget
 
-def calculate_total_expenive(budget,expensive):
-    total_expensive = 0
-    for amount in expensive['amount']:
-        total_expensive +=int(amount)
 
-    if budget > total_expensive:
-        print('Warning your have exceed your monthly budget\n')
-    elif total_expensive <0:
-        print('Danger! you have a debpt')
+def calculate_total_expensive(budget):
+    """
+    Calculate and compare total expenses against the budget.
+    :param budget: User's budget
+    :return: None
+    """
+    total_expensive = sum(map(int, expensive['amount']))
+    print(f'Total Expenses: {total_expensive}')
 
+    if total_expensive > budget:
+        print('Warning: You have exceeded your monthly budget!')
     else:
-        print(f'You have {total_expensive} left for the month\n')
+        print(f'You have {budget - total_expensive} left for the month.')
 
 
-def save_expensive_csv(expensive):
+def save_expensive_csv():
+    """
+    Save expenses to a CSV file.
+    :return: None
+    """
     df = pd.DataFrame(expensive)
-    csv_file_path = 'expensive.csv'
+    csv_file_path = 'expenses.csv'
 
-    if not os.path.exists(csv_file_path):
-        df.to_csv(csv_file_path, index=False)
-    else:
+    # Check if file exists and handle headers
+    if os.path.exists(csv_file_path):
         df.to_csv(csv_file_path, mode='a', header=False, index=False)
+    else:
+        df.to_csv(csv_file_path, index=False)
+    print('Expenses saved successfully.')
+    view_expensive()
+
 
 def read_csv():
-    working_dir = os.getcwd()
-    filename = 'expensive.csv'
+    """
+    Load expenses from CSV file.
+    :return: None
+    """
+    csv_file_path = 'expenses.csv'
 
-    try:
-        df = pd.read_csv(filename)
-
+    if os.path.exists(csv_file_path):
+        df = pd.read_csv(csv_file_path)
         if not df.empty:
-            print("Here are your expenses:\n")
-            print(df)
-            expensive = handle_empty_csv()
-            return expensive
+            # Load data back into the global dictionary
+            expensive.clear()
+            for col in df.columns:
+                expensive[col] = df[col].tolist()
+            print('Expenses loaded from CSV.')
         else:
-            print("Your expenses file is empty.\n")
-            handle_empty_csv()
-    except pd.errors.EmptyDataError:
-        print("You have not created any rows or columns for your expenses.\n")
-        handle_empty_csv()
-
-
-# Handle an empty CSV or initialize expenses
-def handle_empty_csv():
-    response = input("Do you wish to add new expenses? (yes/no): ").lower()
-    if response.startswith('y'):
-        expensive = get_user_expensive()
-        save_expensive_csv(expensive)
-        return expensive
-    elif response.startswith('n'):
-        print("No expenses added. Exiting.\n")
-        exit()
+            print('CSV file is empty.')
     else:
-        print("Invalid command. Please try again.\n")
-        handle_empty_csv()
+        print('No CSV file found. Starting with empty expenses.')
+
+
+def menu_options():
+    """
+    Display menu options to the user.
+    :return: str
+    """
+    return input(
+        """
+        Choose an option:
+        1: Add expenses
+        2: View expenses
+        3: Track budget
+        4: Save expenses to CSV
+        5: Exit
+        Enter your choice: """
+    )
 
 
 def main():
-   expensive =read_csv()
-   #expensive= get_user_expensive()
-   view_expensive(expensive)
-   budget=get_monthly_budget()
-   calculate_total_expenive(budget, expensive)
-   save_expensive_csv(expensive)
-   handle_empty_csv()
+    read_csv()
+    while True:
+        choice = menu_options()
+        if choice == '1':
+            get_user_expensive()
+        elif choice == '2':
+            view_expensive()
+        elif choice == '3':
+            budget = get_monthly_budget()
+            calculate_total_expensive(budget)
+        elif choice == '4':
+            save_expensive_csv()
+        elif choice == '5':
+            print('Exiting the program. Goodbye!')
+            break
+        else:
+            print('Invalid choice. Please try again.')
 
 
 if __name__ == "__main__":
