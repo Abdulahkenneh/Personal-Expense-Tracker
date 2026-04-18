@@ -57,13 +57,18 @@ Choose an option:
 3: Track budget
 4: Save expenses to CSV
 5: Exit
+
+
 📁 File Structure
 text
 python-expense-tracker-cli/
 ├── expense_tracker.py    # Main application
 ├── expenses.csv          # Auto-generated data file
 └── README.md
+
+
 🧪 Example Session
+
 text
 Enter your expense details:
 Enter date (YYYY-MM-DD): 2026-04-18
@@ -92,7 +97,9 @@ Visual summaries with matplotlib
 
 Web interface with Streamlit
 
+
 📚 Why I Built This
+
 This project was a stepping stone before building larger applications like:
 
 Full-Stack Education Platform
@@ -115,7 +122,5 @@ GitHub | LinkedIn
 Educational use only. Not for production deployment.
 
 text
-
----
 
 ---
